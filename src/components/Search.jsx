@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import md5 from 'md5';
+import Characters from './Characters';
 
 import '../styles/Search.scss';
 
@@ -25,13 +26,15 @@ const Search = () => {
     const hash = generateHash(timeStamp);
 
     const url = `https://gateway.marvel.com:443/v1/public/characters?apikey=${publicKey}&hash=${hash}&ts=${timeStamp}&nameStartsWith=${characterName}&limit=100`;
-    fetch(url).then((response) =>
-      response.json().then((result) => {
-        setCharacterData(result.data).catch((error) => {
-          console.log('There was an error:', error);
-        });
+    fetch(url)
+      .then((response) => response.json())
+      .then((result) => {
+        setCharacterData(result.data);
+        console.log(result.data);
       })
-    );
+      .catch(() => {
+        console.log('error while getting character data');
+      });
   };
 
   const generateHash = (timeStamp) => {
@@ -43,6 +46,9 @@ const Search = () => {
   };
 
   const handleReset = () => {};
+  //TODO implement later
+
+  const getComicData = () => {};
   //TODO implement later
 
   return (
@@ -58,6 +64,10 @@ const Search = () => {
           <button className="reset" onClick={handleReset}></button>
         </div>
       </form>
+
+      {!comicData && characterData && characterData.results[0] && (
+        <Characters data={characterData.results} onClick={getComicData} />
+      )}
     </>
   );
 };
