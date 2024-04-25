@@ -1,5 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
+import md5 from 'md5';
 
 import '../styles/Search.scss';
 
@@ -8,12 +9,34 @@ const Search = () => {
   const [characterData, setCharacterData] = useState(null);
   const [comicData, setComicData] = useState(null);
 
+  const publicKey = import.meta.env.VITE_PUBLIC_KEY;
+  const privateKey = import.meta.env.VITE_PRIVATE_KEY;
+
   const handleSubmit = (event) => {
     event.preventDefault();
     getCharacterData();
   };
 
-  const getCharacterData = () => {};
+  const getCharacterData = () => {
+    setCharacterData(null);
+    setComicData(null);
+
+    const timeStamp = new Date().getTime();
+    const hash = generateHash(timeStamp);
+
+    const url = `https://gateway.marvel.com:443/v1/public/characters?apikey=${publicKey}&hash=${hash}&ts=${timeStamp}&nameStartsWith=${characterName}&limit=100`;
+    fetch(url).then((response) =>
+      response.json().then((result) => {
+        setCharacterData(result.data).catch((error) => {
+          console.log('There was an error:', error);
+        });
+      })
+    );
+  };
+
+  const generateHash = (timeStamp) => {
+    return md5(timeStamp + privateKey + publicKey);
+  };
 
   const handleChange = (event) => {
     setCharacterName(event.target.value);
